@@ -25,7 +25,7 @@ class Film(BaseModel):
     imdb_id = models.CharField(unique=True, max_length=20, null=False, blank=False)
     name = models.CharField(max_length=255, null=False, blank=False)
     plot = models.TextField(null=True, blank=True)
-    content_rating = models.CharField(max_length=5, null=True, blank=True)
+    content_rating = models.CharField(max_length=10, null=True, blank=True)
     genres = ArrayField(
         models.CharField(max_length=20, blank=True),
         null=True,
