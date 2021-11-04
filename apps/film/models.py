@@ -50,8 +50,8 @@ class Film(BaseModel):
     actors = models.ManyToManyField('Artist', related_name='acted_films')
     photo_url = models.URLField(null=True, blank=True)
     banner_url = models.URLField(null=True, blank=True)
-    photo = models.ImageField(null=True, blank=True)
-    banner = models.ImageField(null=True, blank=True)
+    photo = models.ImageField(upload_to='posters', null=True, blank=True)
+    banner = models.ImageField(upload_to='banners', null=True, blank=True)
     trailer = models.URLField(null=True, blank=True)
     year = models.IntegerField(null=False, blank=False)
     imdb = models.FloatField(
@@ -132,13 +132,15 @@ class Film(BaseModel):
         if self.photo_url:
             img = self.get_image_from_url(url=self.photo_url)
             img_file = File(img)
-            self.photo.save(img.name, img_file)
+            file_name = self.photo_url.split('/')[-1]
+            self.photo.save(file_name, img_file)
 
     def download_banner(self):
         if self.banner_url:
             img = self.get_image_from_url(url=self.banner_url)
             img_file = File(img)
-            self.banner.save(img.name, img_file)
+            file_name = self.banner_url.split('/')[-1]
+            self.banner.save(file_name, img_file)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
