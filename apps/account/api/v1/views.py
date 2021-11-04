@@ -368,7 +368,7 @@ class SelfProfileViewSet(
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=ListWatchedSerializer,
+        serializer_class=ListWatchListSerializer,
         url_name="self_fave",
         url_path="fav",
     )
@@ -484,7 +484,7 @@ class OtherProfileViewSet(
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=ListWatchedSerializer,
+        serializer_class=ListWatchListSerializer,
         url_name="other_fave",
         url_path="fav",
     )

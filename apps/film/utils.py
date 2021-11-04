@@ -29,7 +29,7 @@ class IMDBApiCall:
         except IndexError:
             return None
 
-    def _get_proper_image_size(self, image_link: str, _type: str):
+    def _get_proper_image_size(self, image_link: str, type_: str):
         """
         Cropping and making photos smaller
         """
@@ -48,9 +48,9 @@ class IMDBApiCall:
             'poster': constants.FILM_SIZE,
         }
 
-        return f"{constants.AMAZON_IMAGE_LINK}{image_id}{types.get(_type)}"
+        return f"{constants.AMAZON_IMAGE_LINK}{image_id}{types.get(type_)}"
 
-    def _get_proper_poster_size(self, image_id: str, _type: str):
+    def _get_proper_poster_size(self, image_id: str, type_: str):
         """
         Cropping and making photos smaller
         """
@@ -58,10 +58,10 @@ class IMDBApiCall:
             'poster': constants.POSTER_WIDTH,
             'banner': constants.BANNER_WIDTH,
         }
-        return f"{constants.TMDB_IMAGE_LINK}{types.get(_type)}/{image_id}"
+        return f"{constants.TMDB_IMAGE_LINK}{types.get(type_)}/{image_id}"
 
     def _list_poster(self, image_link: str):
-        return self._get_proper_image_size(image_link, _type='poster')
+        return self._get_proper_image_size(image_link, type_='poster')
 
     def search(self, film: str) -> list:
         url = self.search_url + film
@@ -84,7 +84,7 @@ class IMDBApiCall:
         return [{
             'imdb_id': attr['id'],
             'name': attr['name'],
-            'photo': self._get_proper_image_size(image_link=attr.get('image', None), _type='actor'),
+            'photo': self._get_proper_image_size(image_link=attr.get('image', None), type_='actor'),
         } for attr in attrs]
 
     def _get_nested_value(self, attr: dict, what_to_get: str):
@@ -111,7 +111,7 @@ class IMDBApiCall:
         try:
             photo = self._get_proper_poster_size(
                 image_id=found_film['posters']['posters'][0]['id'],
-                _type='poster'
+                type_='poster'
             )
         except (IndexError, KeyError):
             photo = None
@@ -119,7 +119,7 @@ class IMDBApiCall:
         try:
             banner = self._get_proper_poster_size(
                 image_id=found_film['posters']['backdrops'][0]['id'],
-                _type='banner'
+                type_='banner'
             )
         except (IndexError, KeyError):
             banner = None
@@ -129,15 +129,15 @@ class IMDBApiCall:
             'plot': found_film.get('plot', None),
             'name': found_film.get('title', None),
             'year': found_film.get('year', None),
-            'photo': photo,
-            'banner': banner,
-            'time': found_film.get('runtimeMins', None),
+            'photo_url': photo,
+            'banner_url': banner,
+            'time': found_film.get('runtimeMins', None) or None,
             'writers': writers,
             'directors': directors,
             'actors': actors[:constants.ACTORS_COUNT],
-            'imdb': found_film.get('imDbRating', None),
+            'imdb': found_film.get('imDbRating', None) or None,
             'rotten': rotten,
-            'metacritic': found_film.get('metacriticRating', None),
+            'metacritic': found_film.get('metacriticRating', None) or None,
             'languages': languages,
             'countries': countries,
             'trailer': trailer,

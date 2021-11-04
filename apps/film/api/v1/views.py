@@ -91,6 +91,7 @@ class FavViewSet(GenericViewSet):
     def add(self, request, *args, **kwargs):
         selected_film = self.get_object()
         self.request.user.film_favorites.add(selected_film)
+        self.request.user.films_watched.add(selected_film)
 
         return Response(
             {'details': 'added'},

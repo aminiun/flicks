@@ -1,3 +1,7 @@
+from urllib.request import urlopen
+
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -44,13 +48,15 @@ class Film(BaseModel):
     writers = models.ManyToManyField('Artist', related_name='wrote_films')
     directors = models.ManyToManyField('Artist', related_name='directed_films')
     actors = models.ManyToManyField('Artist', related_name='acted_films')
-    photo = models.URLField(null=True, blank=True)
-    banner = models.URLField(null=True, blank=True)
+    photo_url = models.URLField(null=True, blank=True)
+    banner_url = models.URLField(null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True)
+    banner = models.ImageField(null=True, blank=True)
     trailer = models.URLField(null=True, blank=True)
     year = models.IntegerField(null=False, blank=False)
     imdb = models.FloatField(
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
     )
     rotten = models.IntegerField(
@@ -112,6 +118,34 @@ class Film(BaseModel):
             users_favorite=user,
             **kwargs
         ).exists()
+
+    @staticmethod
+    def get_image_from_url(url):
+        img_tmp = NamedTemporaryFile(delete=True)
+        with urlopen(url=url, timeout=10) as uo:
+            assert uo.status == 200
+            img_tmp.write(uo.read())
+            img_tmp.flush()
+        return img_tmp
+
+    def download_photo(self):
+        if self.photo_url:
+            img = self.get_image_from_url(url=self.photo_url)
+            img_file = File(img)
+            self.photo.save(img.name, img_file)
+
+    def download_banner(self):
+        if self.banner_url:
+            img = self.get_image_from_url(url=self.banner_url)
+            img_file = File(img)
+            self.banner.save(img.name, img_file)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.photo:
+            self.download_photo()
+        if not self.banner:
+            self.download_banner()
 
     def __str__(self):
         return f"Film {self.name} ({str(self.year)})"
