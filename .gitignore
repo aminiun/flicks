@@ -1,0 +1,13 @@
+/.env
+/venv/
+.idea
+.idea/*
+**/__pychache__/
+
+*.log
+*.pot
+*.pyc
+__pycache__
+
+media
+static
