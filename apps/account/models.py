@@ -13,12 +13,12 @@ from apps.account.managers import UserManager
 from core.models.base import BaseModel
 
 
-def user_profile_path(instance, filename):
-    return f"profile/{instance.id}_{instance.name}/profile_photo/{filename}"
+def user_profile_path(instance, filename):                                      # noqa
+    return f"profile/profile_photo/{instance.id}"
 
 
-def user_benner_path(instance, filename):
-    return f"profile/{instance.id}_{instance.name}/banner/{filename}"
+def user_benner_path(instance, filename):                                       # noqa
+    return f"profile/banner/{instance.id}"
 
 
 class PhoneOTP(BaseModel):
@@ -90,13 +90,13 @@ class User(AbstractBaseUser, BaseModel):
     followers = models.ManyToManyField('User', related_name='user_followers', blank=True)
     followings = models.ManyToManyField('User', related_name='user_followings', blank=True)
 
-    film_favorites = models.ManyToManyField('film.Film', related_name='users_favorite', blank=True)
+    film_favorites = models.ManyToManyField('film.Film', related_name='users_favorite', blank=True) # noqa
     # series_favorites = models.ManyToManyField('series.Series', related_name='users_favorite', blank=True)
 
-    films_watched = models.ManyToManyField('film.Film', related_name='users_watched', blank=True)
+    films_watched = models.ManyToManyField('film.Film', related_name='users_watched', blank=True)   # noqa
     # series_watched = models.ManyToManyField('series.Series', related_name='users_watched', blank=True)
 
-    films_watchlist = models.ManyToManyField('film.Film', related_name='users_watchlist', blank=True)
+    films_watchlist = models.ManyToManyField('film.Film', related_name='users_watchlist', blank=True)   # noqa
     # series_watchlist = models.ManyToManyField('series.Series', related_name='users_watched', blank=True)
 
     admin = models.BooleanField(default=False)
