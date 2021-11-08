@@ -210,7 +210,6 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
     followers_count = serializers.IntegerField(source='user.followers_count', read_only=True)
     followings_count = serializers.IntegerField(source='user.followings_count', read_only=True)
     films_watched_count = serializers.IntegerField(source='user.films_watched_count', read_only=True)
-    is_followed = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -223,8 +222,14 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
             'followers_count',
             'followings_count',
             'films_watched_count',
-            'is_followed',
         ]
+
+
+class OtherProfileDetailSerializer(ProfileDetailSerializer):
+    is_followed = serializers.SerializerMethodField()
+
+    class Meta(ProfileDetailSerializer.Meta):
+        fields = ProfileDetailSerializer.Meta.fields + ["is_followed"]
 
     def get_is_followed(self, obj):
         request = self.context.get('request', None)

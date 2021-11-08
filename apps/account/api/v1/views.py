@@ -388,7 +388,7 @@ class OtherProfileViewSet(
     mixins.ListModelMixin,
     GenericViewSet
 ):
-    serializer_class = serializers.ProfileDetailSerializer
+    serializer_class = serializers.OtherProfileDetailSerializer
     queryset = User.active_objects.active()
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'profile__name']
