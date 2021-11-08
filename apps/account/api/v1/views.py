@@ -56,7 +56,7 @@ class AuthViewSet(GenericViewSet):
         url_name="verify",
         url_path="verify",
     )
-    def verify(self, request, pk, *args, **kwargs):
+    def verify(self, request, *args, **kwargs):
         """
         Verify sent OTP and input OTP with phone number
         """
@@ -66,9 +66,14 @@ class AuthViewSet(GenericViewSet):
 
         otp = serializer.validated_data["otp"]
 
+        if not existed_otp.has_otp:
+            raise ValidationError(
+                {'details': 'Your code is expired. Try to get it again'}
+            )
+
         if not existed_otp.check_otp(otp):
             raise ValidationError(
-                {'details': 'OTP wrong!'}
+                {'details': 'Entered code is wrong!'}
             )
 
         existed_otp.verify()
@@ -127,8 +132,8 @@ class AuthViewSet(GenericViewSet):
 
         if not logged_in_user.check_password(password):
             return Response(
-                {'details': 'Username or password is wrong!'}
-                , status=status.HTTP_401_UNAUTHORIZED
+                {'details': 'Username or password is wrong!'},
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         refresh = RefreshToken.for_user(user=logged_in_user)
@@ -181,7 +186,7 @@ class AuthViewSet(GenericViewSet):
         phone = serializer.validated_data['phone']
         user = get_object_or_404(PhoneOTP.active_objects.active(), phone=phone)
 
-        otp = user.set_otp()
+        user.set_otp()
 
         return Response(
             self.get_serializer(user).data,
@@ -195,18 +200,18 @@ class AuthViewSet(GenericViewSet):
         url_name="forget_password_change",
         url_path="forget_password_change",
     )
-    def forget_password_change(self, request, pk, *args, **kwargs):
+    def forget_password_change(self, request, *args, **kwargs):
         existed_otp = self.get_object()
         if not existed_otp.is_verified:
             raise ValidationError(
-                {'details': 'first verify phone number'}
+                {'details': 'First verify your phone number'}
             )
 
         user = get_object_or_404(User.active_objects.active(), phone=existed_otp.phone)
 
         serializer = self.get_serializer(instance=user, data=request.data)
         serializer.is_valid(raise_exception=True)
-        updated_user = serializer.save()
+        serializer.save()
 
         return Response(
             {
@@ -368,7 +373,7 @@ class SelfProfileViewSet(
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=ListWatchListSerializer,
+        serializer_class=ListWatchedSerializer,
         url_name="self_fave",
         url_path="fav",
     )
@@ -383,7 +388,7 @@ class OtherProfileViewSet(
     mixins.ListModelMixin,
     GenericViewSet
 ):
-    serializer_class = serializers.ProfileDetailSerializer
+    serializer_class = serializers.OtherProfileDetailSerializer
     queryset = User.active_objects.active()
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'profile__name']
@@ -484,7 +489,7 @@ class OtherProfileViewSet(
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=ListWatchListSerializer,
+        serializer_class=ListWatchedSerializer,
         url_name="other_fave",
         url_path="fav",
     )
@@ -505,7 +510,7 @@ class FollowViewSet(GenericViewSet):
         url_name="follow",
         url_path="follow",
     )
-    def follow(self, request, pk, *args, **kwargs):
+    def follow(self, request, *args, **kwargs):
         user = request.user
         following_user = self.get_object()
         if user == following_user:
@@ -527,7 +532,7 @@ class FollowViewSet(GenericViewSet):
         url_name="unfollow",
         url_path="unfollow",
     )
-    def unfollow(self, request, pk, *args, **kwargs):
+    def unfollow(self, request, *args, **kwargs):
         user = request.user
         unfollowing_user = self.get_object()
         if user == unfollowing_user:
@@ -549,7 +554,7 @@ class FollowViewSet(GenericViewSet):
         url_name="remove_follower",
         url_path="remove_follower",
     )
-    def remove_follower(self, request, pk, *args, **kwargs):
+    def remove_follower(self, request, *args, **kwargs):
         user = request.user
         removing_user = self.get_object()
         if user == removing_user:
