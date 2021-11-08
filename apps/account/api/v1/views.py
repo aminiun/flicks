@@ -66,9 +66,14 @@ class AuthViewSet(GenericViewSet):
 
         otp = serializer.validated_data["otp"]
 
+        if not existed_otp.has_otp:
+            raise ValidationError(
+                {'details': 'Your code is expired. Try to get it again'}
+            )
+
         if not existed_otp.check_otp(otp):
             raise ValidationError(
-                {'details': 'OTP wrong!'}
+                {'details': 'Entered code is wrong!'}
             )
 
         existed_otp.verify()
@@ -199,7 +204,7 @@ class AuthViewSet(GenericViewSet):
         existed_otp = self.get_object()
         if not existed_otp.is_verified:
             raise ValidationError(
-                {'details': 'first verify phone number'}
+                {'details': 'First verify your phone number'}
             )
 
         user = get_object_or_404(User.active_objects.active(), phone=existed_otp.phone)
