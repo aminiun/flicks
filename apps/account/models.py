@@ -14,11 +14,11 @@ from core.models.base import BaseModel
 
 
 def user_profile_path(instance, filename):                                      # noqa
-    return f"profile/profile_photo/{instance.id}"
+    return f"profile/profile_photo/{instance.id}/{filename}"
 
 
 def user_benner_path(instance, filename):                                       # noqa
-    return f"profile/banner/{instance.id}"
+    return f"profile/banner/{instance.id}/{filename}"
 
 
 class PhoneOTP(BaseModel):
