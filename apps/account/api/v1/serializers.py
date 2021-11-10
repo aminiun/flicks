@@ -143,6 +143,10 @@ class ForgetPasswordSerializer(serializers.ModelSerializer):
             'password',
         ]
 
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data.get('password'))
+        return instance
+
 
 class ChangePasswordSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(required=True)
