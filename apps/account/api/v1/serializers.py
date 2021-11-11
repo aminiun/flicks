@@ -144,7 +144,9 @@ class ForgetPasswordSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
-        instance.set_password(validated_data.get('password'))
+        password = validated_data['password']
+        instance.set_password(password)
+        instance.save()
         return instance
 
 
