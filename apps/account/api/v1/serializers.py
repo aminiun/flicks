@@ -189,12 +189,16 @@ class EditProfileSerializer(serializers.ModelSerializer):
             'username',
         ]
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise ValidationError(
-                'username already exists'
-            )
-        return value
+    def validate(self, attrs):
+        self_user = self.context['request'].user
+        new_user = attrs.get('user', None)
+        if new_user:
+            username = new_user.get('username')
+            if User.objects.filter(username=username).exclude(id=self_user.id).exists():
+                raise ValidationError(
+                    {'details': 'username already exists'}
+                )
+        return super().validate(attrs=attrs)
 
     def update(self, instance, validated_data):
         try:
