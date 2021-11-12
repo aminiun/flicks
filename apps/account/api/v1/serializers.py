@@ -216,6 +216,7 @@ class EditProfileSerializer(serializers.ModelSerializer):
 
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     followers_count = serializers.IntegerField(source='user.followers_count', read_only=True)
     followings_count = serializers.IntegerField(source='user.followings_count', read_only=True)
@@ -224,6 +225,7 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
+            'id',
             'bio',
             'name',
             'photo',
