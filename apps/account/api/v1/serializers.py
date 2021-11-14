@@ -22,22 +22,6 @@ class OTPSerializer(serializers.ModelSerializer):
 
 class SendOTPSerializer(OTPSerializer):
 
-    def validate(self, attrs):
-        """
-        Validating if not user existed
-        """
-        attrs = super().validate(attrs)
-
-        # TODO handle being able to create user with inactive user
-        # Check both active and inactive to avoid db conflicts ...
-        user_existed = User.objects.filter(phone=attrs['phone']).exists()
-        if user_existed:
-            raise ValidationError(
-                {'details': 'User with that phone number already existed'}
-            )
-
-        return attrs
-
     def create(self, validated_data):
         """
         If OTP already has been sent to user, just returns it's model to resend OTP

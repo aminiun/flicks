@@ -33,8 +33,16 @@ class AuthViewSet(GenericViewSet):
         """
         Sending OTP sms to user phone number
         """
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        user_existed = User.objects.filter(phone=serializer.validated_data['phone']).exists()
+        if user_existed:
+            raise ValidationError(
+                {'details': 'User with that phone number already existed'}
+            )
+
         unverified_user, created = serializer.save()
 
         if not created:
