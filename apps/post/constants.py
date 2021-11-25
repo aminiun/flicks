@@ -22,3 +22,4 @@ GENRES = (
     'documentary',
 )
 
+MAX_GENRE_VALUE = 10

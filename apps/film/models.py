@@ -120,6 +120,13 @@ class Film(BaseModel):
         ).exists()
 
     @staticmethod
+    def has_post_by_user(user: User, **kwargs) -> bool:
+        return Film.active_objects.active().filter(
+            posts__user=user,
+            **kwargs
+        ).exists()
+
+    @staticmethod
     def get_image_from_url(url):
         img_tmp = NamedTemporaryFile(delete=True)
         with urlopen(url=url, timeout=10) as uo:

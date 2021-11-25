@@ -8,6 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 from apps.film.api.v1 import serializers
 from apps.film.models import Film, Artist
 from apps.film.utils import IMDBApiCall
+from apps.post.models import Post
 from core.pagination import CustomLimitOffsetPagination
 
 
@@ -57,6 +58,7 @@ class WatchedViewSet(GenericViewSet):
     def add(self, request, *args, **kwargs):
         selected_film = self.get_object()
         self.request.user.films_watched.add(selected_film)
+        self.request.user.films_watchlist.remove(selected_film)
 
         return Response(
             {'details': 'added'},
@@ -72,6 +74,11 @@ class WatchedViewSet(GenericViewSet):
     def remove(self, request, *args, **kwargs):
         selected_film = self.get_object()
         self.request.user.films_watched.remove(selected_film)
+        self.request.user.film_favorites.remove(selected_film)
+
+        if Film.has_post_by_user(user=self.request.user, id=selected_film.id):
+            posts = Post.objects.filter(user=self.request.user, film=selected_film)
+            posts.update(is_active=False)
 
         return Response(
             {'details': 'removed'},
@@ -210,7 +217,7 @@ class FilmViewSet(
 
         return Response(
             out_serializer(instance=created_film).data,
-            status=status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
 
     @action(
@@ -220,7 +227,7 @@ class FilmViewSet(
         url_name="posts",
         url_path="posts",
     )
-    def posts(self, request, pk, *args, **kwargs):
+    def posts(self, request, *args, **kwargs):
         """
         Showing the posts of a film
         First the posts of followings come, then the other posts

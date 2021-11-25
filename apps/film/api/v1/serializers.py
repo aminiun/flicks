@@ -89,6 +89,8 @@ class ListWatchListSerializer(FilmListSerializer):
 class ListWatchedSerializer(FilmListSerializer):
     is_watched = serializers.SerializerMethodField(read_only=True)
     is_watchlist = serializers.SerializerMethodField(read_only=True)
+    is_fav = serializers.SerializerMethodField(read_only=True)
+    has_post = serializers.SerializerMethodField(read_only=True)
 
     class Meta(FilmListSerializer.Meta):
         fields = FilmListSerializer.Meta.fields + [
@@ -97,6 +99,8 @@ class ListWatchedSerializer(FilmListSerializer):
             'imdb',
             'is_watched',
             'is_watchlist',
+            'is_fav',
+            'has_post',
         ]
 
     def get_is_watched(self, obj):
@@ -107,6 +111,14 @@ class ListWatchedSerializer(FilmListSerializer):
         user = self.context.get('request').user
         return Film.is_watchlist_by_user(user=user, id=obj.id)
 
+    def get_is_fav(self, obj):
+        user = self.context.get('request').user
+        return Film.is_faved_by_user(user=user, id=obj.id)
+
+    def get_has_post(self, obj):
+        user = self.context.get('request').user
+        return Film.has_post_by_user(user=user, id=obj.id)
+
 
 class IMDBListSerializer(serializers.Serializer):
     imdb_id = serializers.CharField()
@@ -116,6 +128,8 @@ class IMDBListSerializer(serializers.Serializer):
     watched_count = serializers.SerializerMethodField(read_only=True)
     is_watched = serializers.SerializerMethodField(read_only=True)
     is_watchlist = serializers.SerializerMethodField(read_only=True)
+    is_fav = serializers.SerializerMethodField(read_only=True)
+    has_post = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         fields = [
@@ -126,6 +140,8 @@ class IMDBListSerializer(serializers.Serializer):
             'watched_count',
             'is_watched',
             'is_watchlist',
+            'is_fav',
+            'has_post',
         ]
         # read_only_true = fields
 
@@ -153,6 +169,14 @@ class IMDBListSerializer(serializers.Serializer):
     def get_is_watchlist(self, obj):
         user = self.context.get('request').user
         return Film.is_watchlist_by_user(user=user, imdb_id=obj.get('imdb_id'))
+
+    def get_is_fav(self, obj):
+        user = self.context.get('request').user
+        return Film.is_faved_by_user(user=user, imdb_id=obj.get('imdb_id'))
+
+    def get_has_post(self, obj):
+        user = self.context.get('request').user
+        return Film.has_post_by_user(user=user, imdb_id=obj.get('imdb_id'))
 
 
 class FetchIMDBFilmSerializer(serializers.Serializer):

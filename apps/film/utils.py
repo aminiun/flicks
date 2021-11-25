@@ -100,6 +100,7 @@ class IMDBApiCall:
 
         languages = self._get_in_list_format(found_film.get('languageList', None))
         countries = self._get_in_list_format(found_film.get('countryList', None))
+        genres = self._get_in_list_format(found_film.get('genreList', None))
 
         writers = self._get_in_list_of_dict_format(found_film.get('writerList', None))
         directors = self._get_in_list_of_dict_format(found_film.get('directorList', None))
@@ -142,4 +143,5 @@ class IMDBApiCall:
             'countries': countries,
             'trailer': trailer,
             'content_rating': found_film.get('contentRating', None),
+            'genres': genres,
         }

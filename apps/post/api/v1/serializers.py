@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from apps.film.models import Film
-from apps.post.constants import GENRES
+from apps.post.constants import GENRES, MAX_GENRE_VALUE
 from apps.post.models import Post
 
 User = get_user_model()
@@ -36,14 +36,20 @@ class PostCreateSerializer(serializers.ModelSerializer):
     def validate_genres(self, value):
         if not value or not isinstance(value, dict):
             raise ValidationError(
-                {'genres': 'Invalid genre'}
+                'Invalid genre'
             )
 
-        for genre in value.keys():
+        for genre, rate in value.items():
             if genre not in GENRES:
                 raise ValidationError(
-                    {'genres': f'No genre called {genre}'}
+                    f'No genre called {genre}'
                 )
+
+            if rate > MAX_GENRE_VALUE:
+                raise ValidationError(
+                    f'Invalid value for {genre}'
+                )
+
         return value
 
     def create(self, validated_data):
