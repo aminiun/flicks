@@ -23,7 +23,7 @@ class WatchListViewSet(GenericViewSet):
     )
     def add(self, request, *args, **kwargs):
         selected_film = self.get_object()
-        self.request.user.films_watchlist.add(selected_film)
+        selected_film.add_to_watchlist(user=self.request.user)
 
         return Response(
             {'details': 'added'},
@@ -57,8 +57,7 @@ class WatchedViewSet(GenericViewSet):
     )
     def add(self, request, *args, **kwargs):
         selected_film = self.get_object()
-        self.request.user.films_watched.add(selected_film)
-        self.request.user.films_watchlist.remove(selected_film)
+        selected_film.add_to_watched(user=self.request.user)
 
         return Response(
             {'details': 'added'},
@@ -73,12 +72,11 @@ class WatchedViewSet(GenericViewSet):
     )
     def remove(self, request, *args, **kwargs):
         selected_film = self.get_object()
-        self.request.user.films_watched.remove(selected_film)
-        self.request.user.film_favorites.remove(selected_film)
+        selected_film.remove_from_watched(user=self.request.user)
 
-        if Film.has_post_by_user(user=self.request.user, id=selected_film.id):
-            posts = Post.objects.filter(user=self.request.user, film=selected_film)
-            posts.update(is_active=False)
+        if Film.has_post_by_user(user=self.request.user):
+            posts = Post.objects.get(user=self.request.user, film=selected_film)
+            posts.delete()
 
         return Response(
             {'details': 'removed'},
@@ -97,8 +95,7 @@ class FavViewSet(GenericViewSet):
     )
     def add(self, request, *args, **kwargs):
         selected_film = self.get_object()
-        self.request.user.film_favorites.add(selected_film)
-        self.request.user.films_watched.add(selected_film)
+        selected_film.add_to_favorite(user=self.request.user)
 
         return Response(
             {'details': 'added'},
@@ -197,16 +194,17 @@ class FilmViewSet(
             )
 
         found_film = IMDBApiCall().fetch(imdb_id)
+
         actors = [
-            Artist.objects.get_or_create(**actor)[0]
+            Artist.objects.get(imdb_id=actor['imdb_id']) or Artist.objects.create(**actor)
             for actor in found_film.pop('actors', None)
         ]
         writers = [
-            Artist.objects.get_or_create(**writer)[0]
+            Artist.objects.get(imdb_id=writer['imdb_id']) or Artist.objects.create(**writer)
             for writer in found_film.pop('writers', None)
         ]
         directors = [
-            Artist.objects.get_or_create(**director)[0]
+            Artist.objects.get(imdb_id=director['imdb_id']) or Artist.objects.create(**director)
             for director in found_film.pop('directors', None)
         ]
 

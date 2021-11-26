@@ -85,6 +85,24 @@ class Film(BaseModel):
     def rate_average(self) -> float:
         return self.posts.all().aggregate(rate_avg=Avg('rate')).get('rate_avg', 0)
 
+    def add_to_watchlist(self, user: User):
+        user.films_watchlist.add(self)
+        user.films_watched.remove(self)
+        user.film_favorites.remove(self)
+
+    def add_to_watched(self, user: User):
+        user.films_watched.add(self)
+        user.films_watchlist.remove(self)
+
+    def add_to_favorite(self, user: User):
+        user.film_favorites.add(self)
+        user.films_watched.add(self)
+        user.films_watchlist.remove(self)
+
+    def remove_from_watched(self, user: User):
+        user.films_watched.remove(self)
+        user.film_favorites.remove(self)
+
     @property
     def genres_average(self) -> dict:
         extracted_genre = {
@@ -98,33 +116,17 @@ class Film(BaseModel):
         ).aggregate(**avg)
         return {k: v for k, v in genres_avgs.items() if v}
 
-    @staticmethod
-    def is_watched_by_user(user: User, **kwargs) -> bool:
-        return Film.active_objects.active().filter(
-            users_watched=user,
-            **kwargs
-        ).exists()
+    def is_watched_by_user(self, user: User) -> bool:
+        return user in self.users_watched.all()
 
-    @staticmethod
-    def is_watchlist_by_user(user: User, **kwargs) -> bool:
-        return Film.active_objects.active().filter(
-            users_watchlist=user,
-            **kwargs
-        ).exists()
+    def is_watchlist_by_user(self, user: User) -> bool:
+        return user in self.users_watchlist.all()
 
-    @staticmethod
-    def is_faved_by_user(user: User, **kwargs) -> bool:
-        return Film.active_objects.active().filter(
-            users_favorite=user,
-            **kwargs
-        ).exists()
+    def is_faved_by_user(self, user: User) -> bool:
+        return user in self.users_favorite.all()
 
-    @staticmethod
-    def has_post_by_user(user: User, **kwargs) -> bool:
-        return Film.active_objects.active().filter(
-            posts__user=user,
-            **kwargs
-        ).exists()
+    def has_post_by_user(self, user: User) -> bool:
+        return self.posts.filter(is_active=True, user=user).exists()
 
     @staticmethod
     def get_image_from_url(url):

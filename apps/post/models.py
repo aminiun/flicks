@@ -30,10 +30,18 @@ class Post(BaseModel):
     rate = models.FloatField(
         null=True,
         blank=True,
-        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
+        validators=[MinValueValidator(0.0), MaxValueValidator(5.0)]
     )
     caption = models.TextField(null=True, blank=True)
     quote = models.CharField(max_length=255, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.film.add_to_watched(user=self.user)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.film.remove_from_watched(user=self.user)
 
     def __str__(self):
         # if not self.series:

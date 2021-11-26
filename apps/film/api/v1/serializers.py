@@ -105,19 +105,19 @@ class ListWatchedSerializer(FilmListSerializer):
 
     def get_is_watched(self, obj):
         user = self.context.get('request').user
-        return Film.is_watched_by_user(user=user, id=obj.id)
+        return obj.is_watched_by_user(user=user)
 
     def get_is_watchlist(self, obj):
         user = self.context.get('request').user
-        return Film.is_watchlist_by_user(user=user, id=obj.id)
+        return obj.is_watchlist_by_user(user=user)
 
     def get_is_fav(self, obj):
         user = self.context.get('request').user
-        return Film.is_faved_by_user(user=user, id=obj.id)
+        return obj.is_faved_by_user(user=user)
 
     def get_has_post(self, obj):
         user = self.context.get('request').user
-        return Film.has_post_by_user(user=user, id=obj.id)
+        return obj.has_post_by_user(user=user)
 
 
 class IMDBListSerializer(serializers.Serializer):
@@ -145,10 +145,12 @@ class IMDBListSerializer(serializers.Serializer):
         ]
         # read_only_true = fields
 
-    def _film_obj(self, obj):
+    def _film_obj(self, obj) -> Film:
         try:
             return Film.active_objects.active().prefetch_related(
-                'users_watched'
+                'users_watched',
+                'users_watchlist',
+                'users_favorite',
             ).get(
                 imdb_id=obj.get('imdb_id')
             )
@@ -164,19 +166,31 @@ class IMDBListSerializer(serializers.Serializer):
 
     def get_is_watched(self, obj):
         user = self.context.get('request').user
-        return Film.is_watched_by_user(user=user, imdb_id=obj.get('imdb_id'))
+        film = self._film_obj(obj)
+        if not film:
+            return False
+        return film.is_watched_by_user(user=user)
 
     def get_is_watchlist(self, obj):
         user = self.context.get('request').user
-        return Film.is_watchlist_by_user(user=user, imdb_id=obj.get('imdb_id'))
+        film = self._film_obj(obj)
+        if not film:
+            return False
+        return film.is_watchlist_by_user(user=user)
 
     def get_is_fav(self, obj):
         user = self.context.get('request').user
-        return Film.is_faved_by_user(user=user, imdb_id=obj.get('imdb_id'))
+        film = self._film_obj(obj)
+        if not film:
+            return False
+        return film.is_faved_by_user(user=user)
 
     def get_has_post(self, obj):
         user = self.context.get('request').user
-        return Film.has_post_by_user(user=user, imdb_id=obj.get('imdb_id'))
+        film = self._film_obj(obj)
+        if not film:
+            return False
+        return film.has_post_by_user(user=user)
 
 
 class FetchIMDBFilmSerializer(serializers.Serializer):
