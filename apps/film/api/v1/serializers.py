@@ -45,6 +45,10 @@ class FilmDetailSerializer(serializers.ModelSerializer):
     actors = serializers.SerializerMethodField()
     writers = ArtistSerializer(many=True)
     directors = ArtistSerializer(many=True)
+    is_watched = serializers.SerializerMethodField(read_only=True)
+    is_watchlist = serializers.SerializerMethodField(read_only=True)
+    is_fav = serializers.SerializerMethodField(read_only=True)
+    has_post = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Film
@@ -72,6 +76,10 @@ class FilmDetailSerializer(serializers.ModelSerializer):
             "writers",
             "directors",
             "trailer",
+            'is_watched',
+            'is_watchlist',
+            'is_fav',
+            'has_post',
         ]
         extra_kwargs = {
             'imdb_id': {'write_only': True}
@@ -80,6 +88,22 @@ class FilmDetailSerializer(serializers.ModelSerializer):
     def get_actors(self, obj):
         actors = obj.actors.all().order_by('created_time')
         return ArtistSerializer(actors, many=True).data
+
+    def get_is_watched(self, obj):
+        user = self.context.get('request').user
+        return obj.is_watched_by_user(user=user)
+
+    def get_is_watchlist(self, obj):
+        user = self.context.get('request').user
+        return obj.is_watchlist_by_user(user=user)
+
+    def get_is_fav(self, obj):
+        user = self.context.get('request').user
+        return obj.is_faved_by_user(user=user)
+
+    def get_has_post(self, obj):
+        user = self.context.get('request').user
+        return obj.has_post_by_user(user=user)
 
 
 class ListWatchListSerializer(FilmListSerializer):
