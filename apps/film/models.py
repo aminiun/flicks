@@ -103,6 +103,9 @@ class Film(BaseModel):
         user.films_watched.remove(self)
         user.film_favorites.remove(self)
 
+        if self.has_post_by_user(user=user):
+            self.posts.get(user=user).delete()
+
     @property
     def genres_average(self) -> dict:
         extracted_genre = {

@@ -142,7 +142,34 @@ class PostListSerializer(serializers.ModelSerializer):
 
 class PostUpdateSerializer(PostDetailSerializer):
 
-    class Meta(PostDetailSerializer.Meta):
-        read_only_fields = [
+    film = PostFilmSerializer(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            'id',
             'film',
+            'genres',
+            'rate',
+            'caption',
+            'quote',
         ]
+
+    def validate_genres(self, value):
+        if not value or not isinstance(value, dict):
+            raise ValidationError(
+                'Invalid genre'
+            )
+
+        for genre, rate in value.items():
+            if genre not in GENRES:
+                raise ValidationError(
+                    f'No genre called {genre}'
+                )
+
+            if rate > MAX_GENRE_VALUE:
+                raise ValidationError(
+                    f'Invalid value for {genre}'
+                )
+
+        return value

@@ -74,10 +74,6 @@ class WatchedViewSet(GenericViewSet):
         selected_film = self.get_object()
         selected_film.remove_from_watched(user=self.request.user)
 
-        if Film.has_post_by_user(user=self.request.user):
-            posts = Post.objects.get(user=self.request.user, film=selected_film)
-            posts.delete()
-
         return Response(
             {'details': 'removed'},
             status=status.HTTP_200_OK
@@ -195,18 +191,29 @@ class FilmViewSet(
 
         found_film = IMDBApiCall().fetch(imdb_id)
 
-        actors = [
-            Artist.objects.get(imdb_id=actor['imdb_id']) or Artist.objects.create(**actor)
-            for actor in found_film.pop('actors', None)
-        ]
-        writers = [
-            Artist.objects.get(imdb_id=writer['imdb_id']) or Artist.objects.create(**writer)
-            for writer in found_film.pop('writers', None)
-        ]
-        directors = [
-            Artist.objects.get(imdb_id=director['imdb_id']) or Artist.objects.create(**director)
-            for director in found_film.pop('directors', None)
-        ]
+        actors = []
+        for actor in found_film.pop('actors', None):
+            try:
+                artist = Artist.objects.get(imdb_id=actor['imdb_id'])
+            except Artist.DoesNotExist:
+                artist = Artist.objects.create(**actor)
+            actors.append(artist)
+
+        writers = []
+        for writer in found_film.pop('writers', None):
+            try:
+                artist = Artist.objects.get(imdb_id=writer['imdb_id'])
+            except Artist.DoesNotExist:
+                artist = Artist.objects.create(**writer)
+            writers.append(artist)
+
+        directors = []
+        for director in found_film.pop('directors', None):
+            try:
+                artist = Artist.objects.get(imdb_id=director['imdb_id'])
+            except Artist.DoesNotExist:
+                artist = Artist.objects.create(**director)
+            directors.append(artist)
 
         created_film = Film.objects.create(**found_film)
         created_film.actors.add(*actors)

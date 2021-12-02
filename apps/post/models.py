@@ -39,10 +39,6 @@ class Post(BaseModel):
         super().save(*args, **kwargs)
         self.film.add_to_watched(user=self.user)
 
-    def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
-        self.film.remove_from_watched(user=self.user)
-
     def __str__(self):
         # if not self.series:
         return f"{str(self.user)} post for film {str(self.film)}"
