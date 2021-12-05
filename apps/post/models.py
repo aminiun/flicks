@@ -35,9 +35,14 @@ class Post(BaseModel):
     caption = models.TextField(null=True, blank=True)
     quote = models.CharField(max_length=255, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
+    def save(self, watched=True, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.film.add_to_watched(user=self.user)
+        if watched:
+            self.film.add_to_watched(user=self.user)
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_active = False
+        self.save(watched=False)
 
     def __str__(self):
         # if not self.series:
