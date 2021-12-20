@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Avg
 from rest_framework import mixins, status, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -8,7 +8,6 @@ from rest_framework.viewsets import GenericViewSet
 from apps.film.api.v1 import serializers
 from apps.film.models import Film, Artist
 from apps.film.utils import IMDBApiCall
-from apps.post.models import Post
 from core.pagination import CustomLimitOffsetPagination
 
 
@@ -149,7 +148,7 @@ class FilmViewSet(
 ):
 
     serializer_classes = {
-        'list': serializers.ListWatchedSerializer,
+        'list': serializers.FilmHomeListSerializer,
         'retrieve': serializers.FilmDetailSerializer,
         'create': serializers.FetchIMDBFilmSerializer,
     }
@@ -158,6 +157,7 @@ class FilmViewSet(
         'users_favorite',
         'posts',
     ).annotate(
+        rate_avg=Avg('posts__rate'),
         watched=Count('users_watched'),
         fav=Count('users_favorite'),
         post=Count('posts'),
@@ -165,7 +165,7 @@ class FilmViewSet(
 
     pagination_class = CustomLimitOffsetPagination
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['imdb', 'fav', 'watched', 'post']
+    ordering_fields = ['rate_avg', 'fav', 'watched', 'post']
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.serializer_class)

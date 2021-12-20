@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from apps.account.api.v1.serializers import UserListSerializer
 from apps.film.models import Film
 from apps.post.constants import GENRES, MAX_GENRE_VALUE
 from apps.post.models import Post
@@ -127,6 +128,7 @@ class SelfPostListSerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(serializers.ModelSerializer):
+    user = UserListSerializer()
     photo = serializers.ImageField(source='film.photo', default=None)
 
     class Meta:
@@ -137,6 +139,8 @@ class PostListSerializer(serializers.ModelSerializer):
             'rate',
             'photo',
             'genres',
+            'caption',
+            'quote',
         ]
 
 

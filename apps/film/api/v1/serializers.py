@@ -1,8 +1,11 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 from apps.account.api.v1.serializers import UserListSerializer
 from apps.film.models import Film, Artist
 from apps.post.models import Post
+
+User = get_user_model()
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -233,3 +236,22 @@ class FilmCreatedSerializer(serializers.ModelSerializer):
         fields = [
             'id'
         ]
+
+
+class FilmHomeListSerializer(serializers.ModelSerializer):
+    watched_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Film
+        fields = (
+            "id",
+            "photo",
+            'name',
+            'year',
+            'watched_by',
+        )
+
+    def get_watched_by(self, obj):
+        user = self.context['request'].user
+        watched_by = User.active_objects.active().filter(films_watched=obj, followers=user)
+        return UserListSerializer(watched_by, many=True).data
