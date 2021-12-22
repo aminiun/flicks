@@ -157,10 +157,10 @@ class FilmViewSet(
         'users_favorite',
         'posts',
     ).annotate(
-        rate_avg=Avg('posts__rate'),
-        watched=Count('users_watched'),
-        fav=Count('users_favorite'),
-        post=Count('posts'),
+        rate_avg=Avg('posts__rate', distinct=True),
+        watched=Count('users_watched', distinct=True),
+        fav=Count('users_favorite', distinct=True),
+        post=Count('posts', distinct=True),
     )
 
     pagination_class = CustomLimitOffsetPagination
