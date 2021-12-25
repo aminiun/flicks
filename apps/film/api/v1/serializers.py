@@ -254,4 +254,4 @@ class FilmHomeListSerializer(serializers.ModelSerializer):
     def get_watched_by(self, obj):
         user = self.context['request'].user
         watched_by = User.active_objects.active().filter(films_watched=obj, followers=user)
-        return UserListSerializer(watched_by, many=True).data
+        return UserListSerializer(watched_by, many=True, context=self.context).data
