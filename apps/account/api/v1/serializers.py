@@ -149,7 +149,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if not user.check_password(attrs['old_password']):
             raise ValidationError(
-                {'old_password': 'Wrong password!'}
+                {'details': 'Wrong password!'}
             )
         return attrs
 
