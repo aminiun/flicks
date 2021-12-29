@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.film.api.v1 import serializers
+from apps.film.filters import CreatedTimeBasedOrdering
 from apps.film.models import Film, Artist
 from apps.film.utils import IMDBApiCall
 from core.pagination import CustomLimitOffsetPagination
@@ -164,7 +165,7 @@ class FilmViewSet(
     )
 
     pagination_class = CustomLimitOffsetPagination
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [CreatedTimeBasedOrdering]
     ordering_fields = ['rate_avg', 'fav', 'watched', 'post']
 
     def get_serializer_class(self):
