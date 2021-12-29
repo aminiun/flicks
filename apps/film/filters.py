@@ -7,6 +7,6 @@ class CreatedTimeBasedOrdering(filters.OrderingFilter):
         ordering = self.get_ordering(request, queryset, view)
 
         if ordering:
-            return queryset.order_by('-created_time').order_by(*ordering)
+            return queryset.order_by(*ordering, '-created_time')
 
         return queryset
