@@ -158,15 +158,15 @@ class FilmViewSet(
         'users_favorite',
         'posts',
     ).annotate(
-        rate_avg=Avg('posts__rate', distinct=True),
+        rate_avg=Avg('posts__rate'),
         watched=Count('users_watched', distinct=True),
         fav=Count('users_favorite', distinct=True),
         post=Count('posts', distinct=True),
     )
 
     pagination_class = CustomLimitOffsetPagination
-    filter_backends = [CreatedTimeBasedOrdering]
-    ordering_fields = ['rate_avg', 'fav', 'watched', 'post']
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['rate_avg', 'fav', 'watched', 'post', 'created_time']
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.serializer_class)
