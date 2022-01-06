@@ -73,6 +73,11 @@ class RegisterSerializer(serializers.ModelSerializer):
                 {'details': 'first verify phone number'}
             )
 
+        if User.objects.filter(username__iexact=attrs['username']).exists():
+            raise ValidationError({
+                "details": "username already exists"
+            })
+
         return attrs
 
     def create(self, validated_data):
@@ -178,7 +183,7 @@ class EditProfileSerializer(serializers.ModelSerializer):
         new_user = attrs.get('user', None)
         if new_user:
             username = new_user.get('username')
-            if User.objects.filter(username=username).exclude(id=self_user.id).exists():
+            if User.objects.filter(username__iexact=username).exclude(id=self_user.id).exists():
                 raise ValidationError(
                     {'details': 'username already exists'}
                 )

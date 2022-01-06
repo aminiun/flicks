@@ -169,7 +169,7 @@ class AuthViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         # Check username existence in both active and inactive users to avoid db conflicts ...
-        username_exists = User.objects.filter(username=serializer.validated_data['username']).exists()
+        username_exists = User.objects.filter(username__iexact=serializer.validated_data['username']).exists()
 
         return Response(
             {
