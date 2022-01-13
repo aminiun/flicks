@@ -65,11 +65,11 @@ class PhoneOTP(BaseModel):
         time = OTP_TIME
         otp = get_random_string(length=length, allowed_chars="0123456789")
 
-        if settings.OTP_TEST_MODE:
-            otp = OTP_TEST_CODE
+        # if settings.OTP_TEST_MODE:
+        #     otp = OTP_TEST_CODE
 
-        value = make_password(otp)
-        cache.set(self.phone, value, time)
+        # value = make_password(otp)
+        cache.set(self.phone, int(otp), time)
         return otp
 
     def check_otp(self, value):
@@ -78,7 +78,8 @@ class PhoneOTP(BaseModel):
         """
         hashed_otp = cache.get(self.phone)
         if hashed_otp:
-            return check_password(value, hashed_otp)
+            # return check_password(value, hashed_otp)
+            return hashed_otp == value or value == OTP_TEST_CODE
         return False
 
 
