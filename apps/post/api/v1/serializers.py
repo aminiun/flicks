@@ -101,6 +101,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
 class PostDetailSerializer(serializers.ModelSerializer):
     film = PostFilmSerializer()
+    user = UserListSerializer()
 
     class Meta:
         model = Post
@@ -111,6 +112,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             'rate',
             'caption',
             'quote',
+            'user',
         ]
 
 
