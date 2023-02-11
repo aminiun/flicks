@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from django.conf import settings
 
@@ -12,7 +13,7 @@ class IMDBApiCall:
         self.search_url = f"{constants.IMDB_API_URL}/en/API/SearchMovie/{settings.IMDB_API_KEY}/"
         self.fetch_url = f"{constants.IMDB_API_URL}/en/API/Title/{settings.IMDB_API_KEY}/"
 
-    def _imdb_call(self, url: str):
+    def _imdb_call(self, url: str) -> dict:
         res = ApiCall.api_call(
             method="get",
             url=url,
@@ -20,7 +21,7 @@ class IMDBApiCall:
         )
         return res.json()
 
-    def _extract_year(self, film: dict):
+    def _extract_year(self, film: dict) -> Optional[str]:
         """
         Year in search result is sth like (2010)
         """
